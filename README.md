@@ -31,7 +31,7 @@ Requires Node.js 20.9+.
 
 ## Progressive Web App (PWA)
 
-CatatKu is being prepared as an installable PWA. It can be installed from a supported browser on Android, iOS/iPadOS, Windows, and macOS without maintaining separate application codebases.
+CatatKu is an installable PWA and the sole app delivery target. It can be installed from a supported browser on Android, iOS/iPadOS, Windows, and macOS without maintaining separate application codebases.
 
 PWA assets and behavior:
 - `public/manifest.webmanifest` — app name, display mode, colors, and icon.
@@ -43,6 +43,3 @@ The app remains online-first for authentication and transaction operations. Offl
 
 For local installation testing, run `npm run build` and deploy over HTTPS. Open the deployed URL in a supported browser and choose Install app / Add to Home Screen.
 
-## Optional Android packaging
-
-Capacitor dependencies and configuration are retained as an optional future path. PWA is the primary cross-device delivery approach; see [ANDROID.md](./ANDROID.md) only if native Android packaging is needed later.
