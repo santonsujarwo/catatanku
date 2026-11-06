@@ -26,6 +26,14 @@ Import this repository into Vercel and configure:
 
 Set the production URL in Supabase Authentication → URL Configuration (Site URL and Redirect URLs).
 
+## Receipt Scanner (foundation)
+
+The universal receipt scanner is being developed as a PWA-first feature. Its architecture and extraction contract are documented in [docs/receipt-scanner-architecture.md](./docs/receipt-scanner-architecture.md).
+
+Before enabling receipt storage, run [supabase/receipt-scanner-schema.sql](./supabase/receipt-scanner-schema.sql) in Supabase SQL Editor **after** the existing `supabase/schema.sql`. This creates owner-scoped receipt tables and a private `receipts` Storage bucket. The existing transaction workflow is unchanged.
+
+The initial OCR direction is self-hosted PaddleOCR with deterministic parsing; no paid AI API is required. The OCR service and PWA capture/review interface are not deployed yet. OCR requires an online connection in the initial release.
+
 ## Local development
 Requires Node.js 20.9+.
 
