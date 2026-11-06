@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Capacitor loads the exported site from the Android app's local WebView.
-  // Keep the app client-side; data and authentication are handled by Supabase.
-  output: "export",
-  trailingSlash: true,
+  // PWA is served by the Next.js application; no native wrapper or static export is required.
 };
 
 export default nextConfig;
