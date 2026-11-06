@@ -29,18 +29,20 @@ Set the production URL in Supabase Authentication → URL Configuration (Site UR
 ## Local development
 Requires Node.js 20.9+.
 
-## Android app foundation
+## Progressive Web App (PWA)
 
-The project is prepared for Capacitor-based Android packaging. See [ANDROID.md](./ANDROID.md) for requirements, first-time Android project generation, build commands, Supabase notes, and release validation.
+CatatKu is being prepared as an installable PWA. It can be installed from a supported browser on Android, iOS/iPadOS, Windows, and macOS without maintaining separate application codebases.
 
-Quick start after installing Android Studio:
+PWA assets and behavior:
+- `public/manifest.webmanifest` — app name, display mode, colors, and icon.
+- `public/icon.svg` — install icon.
+- `public/sw.js` — app-shell caching for basic offline startup. Supabase/API responses and private transaction data are never cached.
+- `app/pwa-register.tsx` — production service-worker registration.
 
-```bash
-npm install
-npm run build
-npx cap add android
-npm run cap:sync
-npm run cap:open:android
-```
+The app remains online-first for authentication and transaction operations. Offline transaction creation/sync is not implemented yet.
 
-The generated native `android/` project is created locally and is not committed yet. This repository contains the shared web app and Capacitor configuration; APK/AAB signing and Play Store release are a later step.
+For local installation testing, run `npm run build` and deploy over HTTPS. Open the deployed URL in a supported browser and choose Install app / Add to Home Screen.
+
+## Optional Android packaging
+
+Capacitor dependencies and configuration are retained as an optional future path. PWA is the primary cross-device delivery approach; see [ANDROID.md](./ANDROID.md) only if native Android packaging is needed later.
