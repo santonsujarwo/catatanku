@@ -92,6 +92,10 @@ create policy "Users can update their own receipts" on public.receipts
   with check (
     (select auth.uid()) = user_id
     and storage_path like ((select auth.uid())::text || '/%')
+    and exists (
+      select 1 from public.transactions t
+      where t.id = transaction_id and t.user_id = (select auth.uid())
+    )
   );
 
 drop policy if exists "Users can delete their own receipts" on public.receipts;
