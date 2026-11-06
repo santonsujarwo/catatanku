@@ -28,3 +28,19 @@ Set the production URL in Supabase Authentication → URL Configuration (Site UR
 
 ## Local development
 Requires Node.js 20.9+.
+
+## Android app foundation
+
+The project is prepared for Capacitor-based Android packaging. See [ANDROID.md](./ANDROID.md) for requirements, first-time Android project generation, build commands, Supabase notes, and release validation.
+
+Quick start after installing Android Studio:
+
+```bash
+npm install
+npm run build
+npx cap add android
+npm run cap:sync
+npm run cap:open:android
+```
+
+The generated native `android/` project is created locally and is not committed yet. This repository contains the shared web app and Capacitor configuration; APK/AAB signing and Play Store release are a later step.
