@@ -29,11 +29,14 @@ export default function ReceiptScanner({user,onSaved,onClose}:{user:User;onSaved
   async function scan(){
     if(!file||!supabase)return;setBusy(true);setMessage("Mengunggah dokumen...");
     try{
-      const safeName=file.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]/g,"-").slice(-90)||"receipt";
-      const path=user.id+"/"+crypto.randomUUID()+"-"+safeName;
-      setStoragePath(path);
-      const {error:uploadError}=await supabase.storage.from("receipts").upload(path,file,{contentType:file.type,upsert:false});
-      if(uploadError)throw new Error("Upload gagal: "+uploadError.message);
+      let path=storagePath;
+      if(!path){
+        const safeName=file.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]/g,"-").slice(-90)||"receipt";
+        path=user.id+"/"+crypto.randomUUID()+"-"+safeName;
+        const {error:uploadError}=await supabase.storage.from("receipts").upload(path,file,{contentType:file.type,upsert:false});
+        if(uploadError)throw new Error("Upload gagal: "+uploadError.message);
+        setStoragePath(path);
+      }
       setMessage("Membaca isi nota dengan OCR...");
       const {data:{session}}=await supabase.auth.getSession();
       if(!session?.access_token)throw new Error("Sesi login berakhir. Silakan login kembali.");
