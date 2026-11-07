@@ -49,7 +49,7 @@ export default function ReceiptScanner({user,onSaved,onClose}:{user:User;onSaved
     finally{setBusy(false);}
   }
   function update<K extends keyof Draft>(key:K,value:Draft[K]){setDraft(d=>({...d,[key]:value}));}
-  function updateItem(index:number,key:keyof ReceiptItem,value:string|number|null){setDraft(d=>({...d,items:d.items.map((item,i)=>i===index?{...item,[key]:value}:item)}));}
+  function updateItem(index:number,patch:Partial<ReceiptItem>){setDraft(d=>({...d,items:d.items.map((item,i)=>i===index?{...item,...patch}:item)}));}
   async function save(){
     if(!supabase)return;
     if(!draft.total_amount||draft.total_amount<=0){setMessage("Total pembayaran harus diisi.");return;}
@@ -91,7 +91,7 @@ export default function ReceiptScanner({user,onSaved,onClose}:{user:User;onSaved
         </div>
       </div>
       <div className="receipt-items-head"><b>Rincian item / pembayaran</b><button className="secondary" onClick={()=>update("items",[...draft.items,{description:"Item baru",quantity:1,unit:"",unit_price:null,line_total:0,line_type:"product",category:"Belanja",confidence:null}])}>+ Tambah item</button></div>
-      {draft.items.length?draft.items.map((item,index)=><div className="receipt-item-edit" key={index}><input aria-label="Nama item" value={item.description} onChange={e=>updateItem(index,"description",e.target.value)}/><input aria-label="Jumlah" type="number" min="0.001" step="0.001" value={item.quantity} onChange={e=>updateItem(index,"quantity",Number(e.target.value))}/><input aria-label="Total item" type="number" min="0" value={item.line_total} onChange={e=>updateItem(index,"line_total",Number(e.target.value))}/><button onClick={()=>update("items",draft.items.filter((_,i)=>i!==index))}>×</button></div>):<p className="receipt-note">Tidak ada rincian item yang terbaca. Transaksi tetap bisa disimpan sebagai satu total pembayaran.</p>}
+      {draft.items.length?draft.items.map((item,index)=><div className="receipt-item-edit" key={index}><input aria-label="Nama item" value={item.description} onChange={e=>updateItem(index,{description:e.target.value})}/><input aria-label="Jumlah" type="number" min="0.001" step="0.001" value={item.quantity} onChange={e=>updateItem(index,{quantity:Number(e.target.value)})}/><input aria-label="Total item" type="number" min="0" value={item.line_total} onChange={e=>updateItem(index,{line_total:Number(e.target.value)})}/><button onClick={()=>update("items",draft.items.filter((_,i)=>i!==index))}>×</button></div>):<p className="receipt-note">Tidak ada rincian item yang terbaca. Transaksi tetap bisa disimpan sebagai satu total pembayaran.</p>}
       {draft.items.length>0&&<p className="receipt-note">Jumlah rincian terbaca: {money(totalItems)} · Total nota: {money(draft.total_amount)}</p>}
       {draft.warnings.length>0&&<div className="receipt-warning">{draft.warnings.map((w,i)=><p key={i}>• {w}</p>)}</div>}
       {message&&<p className="receipt-message">{message}</p>}
