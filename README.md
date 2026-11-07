@@ -26,13 +26,13 @@ Import this repository into Vercel and configure:
 
 Set the production URL in Supabase Authentication → URL Configuration (Site URL and Redirect URLs).
 
-## Receipt Scanner (foundation)
+## Receipt Scanner (MVP implementation)
 
-The universal receipt scanner is being developed as a PWA-first feature. Its architecture and extraction contract are documented in [docs/receipt-scanner-architecture.md](./docs/receipt-scanner-architecture.md).
+The PWA now includes a Scan Nota capture and review flow. Users can capture a photo or select JPG, PNG, WebP, or PDF. The OCR API is protected by the signed-in Supabase session and forwards files to a separate private PaddleOCR service. See [docs/receipt-scanner-architecture.md](./docs/receipt-scanner-architecture.md).
 
-Before enabling receipt storage, run [supabase/receipt-scanner-schema.sql](./supabase/receipt-scanner-schema.sql) in Supabase SQL Editor **after** the existing `supabase/schema.sql`. This creates owner-scoped receipt tables and a private `receipts` Storage bucket. The existing transaction workflow is unchanged.
+Before using receipt scanning, run [supabase/receipt-scanner-schema.sql](./supabase/receipt-scanner-schema.sql) in Supabase SQL Editor **after** the existing `supabase/schema.sql`. This creates owner-scoped receipt tables and a private `receipts` Storage bucket. The existing transaction workflow is unchanged.
 
-The initial OCR direction is self-hosted PaddleOCR with deterministic parsing; no paid AI API is required. The OCR service and PWA capture/review interface are not deployed yet. OCR requires an online connection in the initial release.
+The OCR engine is self-hosted PaddleOCR with deterministic parsing; no paid AI API is required. The OCR service lives in `ocr-service/` and must be deployed separately. Set `OCR_SERVICE_URL` and `OCR_SERVICE_SECRET` as server-only Vercel environment variables. For local OCR service development, build `ocr-service/Dockerfile` and run it with `OCR_SERVICE_SECRET`; expose its port 8000 only to the Next.js server. OCR requires an online connection. The scan UI is implemented, but the OCR service has not been deployed or production-tested yet.
 
 ## Local development
 Requires Node.js 20.9+.
