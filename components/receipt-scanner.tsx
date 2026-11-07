@@ -14,6 +14,7 @@ const emptyDraft:Draft={document_type:"other",merchant_name:"",transaction_date:
 export default function ReceiptScanner({user,onSaved,onClose}:{user:User;onSaved:(tx:{id:string;title:string;amount:number;kind:"expense";category:string;date:string})=>void;onClose:()=>void}) {
   const [file,setFile]=useState<File|null>(null);
   const [preview,setPreview]=useState("");
+  const [storagePath,setStoragePath]=useState("");
   const [draft,setDraft]=useState<Draft>(emptyDraft);
   const [busy,setBusy]=useState(false);
   const [step,setStep]=useState<"choose"|"review">("choose");
@@ -30,6 +31,7 @@ export default function ReceiptScanner({user,onSaved,onClose}:{user:User;onSaved
     try{
       const safeName=file.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]/g,"-").slice(-90)||"receipt";
       const path=user.id+"/"+crypto.randomUUID()+"-"+safeName;
+      setStoragePath(path);
       const {error:uploadError}=await supabase.storage.from("receipts").upload(path,file,{contentType:file.type,upsert:false});
       if(uploadError)throw new Error("Upload gagal: "+uploadError.message);
       setMessage("Membaca isi nota dengan OCR...");
@@ -50,12 +52,7 @@ export default function ReceiptScanner({user,onSaved,onClose}:{user:User;onSaved
     if(!draft.total_amount||draft.total_amount<=0){setMessage("Total pembayaran harus diisi.");return;}
     setBusy(true);setMessage("Menyimpan transaksi...");
     try{
-      const path=user.id+"/"+(file?.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]/g,"-").slice(-90)||"receipt");
-      // Retrieve the exact uploaded object for this scan from the user's private bucket.
-      const {data:objects,error:listError}=await supabase.storage.from("receipts").list(user.id,{limit:100,sortBy:{column:"created_at",order:"desc"}});
-      if(listError)throw listError;
-      const matched=objects?.find(o=>o.name.includes(file?.name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]/g,"-").slice(-90)||"receipt"));
-      const storagePath=matched?user.id+"/"+matched.name:path;
+      if(!storagePath)throw new Error("Lokasi file nota tidak ditemukan. Silakan scan ulang.");
       const category=draft.document_type==="grocery"?"Belanja":draft.document_type==="restaurant"?"Makanan":["electricity_prepaid","electricity_postpaid","utility"].includes(draft.document_type)?"Tagihan":draft.document_type==="toll_transport"?"Transportasi":draft.document_type==="vehicle_tax"?"Transportasi":draft.document_type==="healthcare"?"Kesehatan":"Lainnya";
       const title=draft.merchant_name.trim()||labels[draft.document_type];
       const {data:transactionId,error:saveError}=await supabase.rpc("create_transaction_with_receipt",{p_transaction:{title,amount:Math.round(draft.total_amount),kind:"expense",category,transaction_date:draft.transaction_date},p_receipt:{document_type:draft.document_type,merchant_name:draft.merchant_name||null,document_date:draft.transaction_date,storage_path:storagePath,original_filename:file?.name||null,mime_type:file?.type||"application/octet-stream",file_size_bytes:file?.size||null,subtotal:draft.subtotal,tax_amount:draft.tax_amount,admin_fee:draft.admin_fee,service_fee:draft.service_fee,discount_amount:draft.discount_amount,total_amount:draft.total_amount,billing_period:draft.billing_period||null,usage_kwh:draft.usage_kwh,purchased_value:draft.purchased_value,received_kwh:draft.received_kwh,customer_reference:draft.customer_reference||null,ocr_engine:"PaddleOCR",ocr_status:"needs_review",ocr_confidence:draft.confidence,ocr_warnings:draft.warnings,extracted_data:{token_detected:draft.token_detected}},p_items:draft.items.map((i,index)=>({...i,sort_order:index,user_id:user.id}))});
