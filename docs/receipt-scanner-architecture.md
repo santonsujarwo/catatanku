@@ -83,19 +83,19 @@ Required environment variables:
 
 ## Phased delivery
 
-### Phase 1 — Foundation (this change)
+### Phase 1 — Foundation (completed in repository)
 - Document the architecture and extraction contract.
 - Add a separate, idempotent Supabase SQL migration for receipt metadata and line items.
 - Create the private Storage bucket and owner-scoped policies.
 - Do not alter the existing transactions table or UI.
 
-### Phase 2 — OCR proof of concept
+### Phase 2 — OCR service and API (implementation added; deployment/testing pending)
 - Add a separate PaddleOCR FastAPI service.
 - Add sample fixtures with synthetic receipts (no real personal data).
 - Test Indonesian thermal receipts, PLN prepaid/postpaid examples, toll and vehicle-tax examples.
 - Record accuracy and failure cases; do not claim universal accuracy.
 
-### Phase 3 — PWA capture and review
+### Phase 3 — PWA capture and review (initial implementation added; end-to-end testing pending)
 - Add camera/file/PDF input, progress/error states, OCR preview, and editable review.
 - Keep all writes behind explicit user confirmation.
 - Add atomic save and duplicate detection.
