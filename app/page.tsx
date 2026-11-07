@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import ReceiptScanner from "@/components/receipt-scanner";
 
 type Kind = "income" | "expense";
 type Tx = { id: string; title: string; amount: number; kind: Kind; category: string; date: string };
@@ -53,6 +54,7 @@ export default function Home() {
   const [selectedMonth,setSelectedMonth]=useState(today().slice(0,7));
   const [filter,setFilter]=useState<"all"|Kind>("all");
   const [editing,setEditing]=useState<Tx|null>(null);
+  const [scannerOpen,setScannerOpen]=useState(false);
 
   useEffect(()=>{
     if(!supabase){setAuthLoading(false);return;}
@@ -127,6 +129,6 @@ export default function Home() {
       <section id="transactions" className="panel"><div className="tx-head"><div><h3>Transaksi terbaru</h3><p className="panel-sub">Semua catatan keuangan di bulan terpilih {loading?"· Memuat...":""}</p></div><div className="filters">{(["all","income","expense"] as const).map(k=><button key={k} className={filter===k?"active":""} onClick={()=>setFilter(k)}>{k==="all"?"Semua":k==="income"?"Masuk":"Keluar"}</button>)}</div></div>{visible.length?visible.map(t=><div className="transaction" key={t.id}><div className={"symbol "+t.kind}>{t.kind==="income"?"↙":t.category==="Makanan"?"☕":t.category==="Transportasi"?"P":"↗"}</div><div className="tx-info"><b>{t.title}</b><small>{t.category} · {new Date(t.date+"T12:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})}</small></div><strong className={"amount "+(t.kind==="income"?"green":"red")}>{t.kind==="income"?"+":"−"}{fmt(t.amount)}</strong><div className="actions"><button onClick={()=>setEditing({...t})}>Edit</button><button onClick={()=>{if(confirm("Hapus transaksi ini?"))void remove(t.id);}}>Hapus</button></div></div>):<div className="empty"><b>Belum ada transaksi</b>Catat transaksi pertamamu di atas.</div>}</section>
       <footer>CatatKu · Data tersimpan di database akunmu.</footer>
     </section>
-    {editing&&<div className="modal" onClick={()=>setEditing(null)}><form className="edit-form" onSubmit={saveEdit} onClick={e=>e.stopPropagation()}><div className="edit-head"><h3>Edit transaksi</h3><button type="button" onClick={()=>setEditing(null)}>×</button></div><label>Nama transaksi<input value={editing.title} onChange={e=>setEditing({...editing,title:e.target.value})} required/></label><label>Nominal<input type="number" min="1" value={editing.amount} onChange={e=>setEditing({...editing,amount:Number(e.target.value)})} required/></label><label>Jenis<select value={editing.kind} onChange={e=>setEditing({...editing,kind:e.target.value as Kind})}><option value="expense">Pengeluaran</option><option value="income">Pemasukan</option></select></label><label>Kategori<input value={editing.category} onChange={e=>setEditing({...editing,category:e.target.value})} required/></label><label>Tanggal<input type="date" value={editing.date} onChange={e=>setEditing({...editing,date:e.target.value})} required/></label><button className="primary">Simpan perubahan</button></form></div>}
+    {scannerOpen&&<ReceiptScanner user={user} onClose={()=>setScannerOpen(false)} onSaved={tx=>setTransactions(prev=>[{...tx},...prev])}/>}\n    {editing&&<div className="modal" onClick={()=>setEditing(null)}><form className="edit-form" onSubmit={saveEdit} onClick={e=>e.stopPropagation()}><div className="edit-head"><h3>Edit transaksi</h3><button type="button" onClick={()=>setEditing(null)}>×</button></div><label>Nama transaksi<input value={editing.title} onChange={e=>setEditing({...editing,title:e.target.value})} required/></label><label>Nominal<input type="number" min="1" value={editing.amount} onChange={e=>setEditing({...editing,amount:Number(e.target.value)})} required/></label><label>Jenis<select value={editing.kind} onChange={e=>setEditing({...editing,kind:e.target.value as Kind})}><option value="expense">Pengeluaran</option><option value="income">Pemasukan</option></select></label><label>Kategori<input value={editing.category} onChange={e=>setEditing({...editing,category:e.target.value})} required/></label><label>Tanggal<input type="date" value={editing.date} onChange={e=>setEditing({...editing,date:e.target.value})} required/></label><button className="primary">Simpan perubahan</button></form></div>}
   </main>;
 }
